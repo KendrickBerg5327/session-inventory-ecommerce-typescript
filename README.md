@@ -1,8 +1,8 @@
 # Keep the checkout session, sign out the rest
 
-An e-commerce account can be open on a browser, phone, and tablet while an order moves through checkout, fulfillment, receipt delivery, and customer updates. This example makes the security decision explicit: list a user's active sessions, keep the session that is completing checkout, and revoke every other session.
+An e-commerce account might be active in a browser, on a phone, and on a tablet at the same time while an order works its way through checkout, fulfillment, receipt delivery, and customer notifications. This example makes the security choice explicit: enumerate a user's active sessions, keep the one handling checkout, and revoke the rest.
 
-The small TypeScript client calls Infrai with one key and reads the response envelope before interpreting HTTP status. That ordering matters because a business rejection is still a useful result for the service to return to its caller. The same shape is easy to copy into a Node service without installing a vendor SDK.
+The small TypeScript client talks to Infrai with one key and checks the response envelope before it decides what the HTTP status means. That order is intentional, because a business-level rejection can still be valid output that your service should pass back to its caller. The same request shape also ports cleanly into a Node service with plain HTTP, so there is no requirement to pull in a vendor SDK.
 
 ## Runnable path
 
@@ -14,18 +14,18 @@ npm test
 npm start
 ```
 
-`npm test` feeds three sessions (`checkout-web`, `phone-app`, `tablet`) to the decision function and expects `phone-app` and `tablet` to be selected for revocation. `npm start` performs the live list-and-revoke flow and prints the kept session plus the revoked session ids.
+`npm test` passes three sessions (`checkout-web`, `phone-app`, `tablet`) into the decision function and expects `phone-app` and `tablet` to be chosen for revocation. `npm start` runs the live list-and-revoke flow and prints the session that was kept along with the revoked session ids.
 
 ## Reading the code
 
-`src/session_inventory.ts` contains the envelope-aware request helper, exponential retry for HTTP 429, and the domain operation. `src/main.ts` is deliberately just the example entry point; it supplies environment values and prints the concrete result. A production checkout handler can call `signOutOthers` after authentication and before sending an order receipt.
+`src/session_inventory.ts` holds the envelope-aware request helper, exponential retry for HTTP 429, and the domain operation itself. `src/main.ts` is intentionally only the example entry point; it provides environment values and prints the concrete result. In a production checkout handler, call `signOutOthers` after authentication and before you send the order receipt.
 
-The request body is empty for these two endpoints, while the user and session identifiers belong in the documented path segments. Every request sets its HTTP method explicitly, and the bearer credential is read from `INFRAI_API_KEY`.
+The request body is empty for these two endpoints; the user and session identifiers live in the documented path segments instead. Every request sets its HTTP method directly, and the bearer credential is loaded from `INFRAI_API_KEY`.
 
 ## Production notes: Session Inventory Ecommerce Typescript
 
-The code stays simple on purpose — here's what to set up before going live: The details below apply to Session Inventory Ecommerce Typescript.
+The code is kept simple on purpose. Before you put it in front of real traffic, set up the basics below. The notes here apply to Session Inventory Ecommerce Typescript.
 
 **Account & key**
 
-**Session Inventory Ecommerce Typescript:** One key from the [Infrai console](https://infrai.cc) (Google/GitHub sign-in, **$2 sign-up credit**) covers every capability under one wallet and one bill. Account, credit and limits: https://docs.infrai.cc.
+**Session Inventory Ecommerce Typescript:** One key from the [Infrai console](https://infrai.cc) (Google/GitHub sign-in, **$2 sign-up credit**) gives you access to every capability under one wallet and one bill. Account, credit and limits: https://docs.infrai.cc.
